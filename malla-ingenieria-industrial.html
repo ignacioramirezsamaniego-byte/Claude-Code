@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Malla Ingeniería Industrial</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow+Semi+Condensed:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: lámina técnica. Cabecera breve, banda fija de avance (tinta + resaltador amarillo)
+   y la malla como grilla de 10 semestres que se va pintando con el color de cada área. */
+:root{
+  --bg:#eef2f5; --surface:#ffffff; --ink:#14222e; --muted:#566675; --rule:#cfd8df; --stripe:#e3e9ee;
+  --band:#14222e; --band-ink:#f1f5f8; --band-muted:#a9b8c4; --band-track:#2e4152;
+  --hl:#ffe14a; --on-hl:#1d1a00; --on-paint:#10202b;
+  --req:#1f4fd6; --unl:#c2410c; --warn:#b42318;
+  --cia:#86dff0; --cia-l:#0b7f97;
+  --ia:#8be59a;  --ia-l:#1c8a37;
+  --ci:#f48acb;  --ci-l:#b8247f;
+  --ind:#b9a8f8; --ind-l:#5a45c9;
+  --pas:#f6b656; --pas-l:#a86200;
+  --hum:#f3e35a; --hum-l:#857400;
+  --opt:#74b4f3; --opt-l:#1c63b8;
+  --adm:#c5ccd2; --adm-l:#66727d;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e171d; --surface:#18252e; --ink:#e7eef3; --muted:#93a5b2; --rule:#2c3c48; --stripe:#132029;
+    --band:#1b2a35; --band-ink:#f1f5f8; --band-muted:#a9b8c4; --band-track:#34495b;
+    --req:#8fb0ff; --unl:#ffa56b; --warn:#ff8a7a;
+    --cia-l:#86dff0; --ia-l:#8be59a; --ci-l:#f48acb; --ind-l:#b9a8f8;
+    --pas-l:#f6b656; --hum-l:#f3e35a; --opt-l:#74b4f3; --adm-l:#aab4bc;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e171d; --surface:#18252e; --ink:#e7eef3; --muted:#93a5b2; --rule:#2c3c48; --stripe:#132029;
+  --band:#1b2a35; --band-ink:#f1f5f8; --band-muted:#a9b8c4; --band-track:#34495b;
+  --req:#8fb0ff; --unl:#ffa56b; --warn:#ff8a7a;
+  --cia-l:#86dff0; --ia-l:#8be59a; --ci-l:#f48acb; --ind-l:#b9a8f8;
+  --pas-l:#f6b656; --hum-l:#f3e35a; --opt-l:#74b4f3; --adm-l:#aab4bc;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.45 var(--f-body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--band)}
+.wrap{max-width:1440px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--req);outline-offset:2px}
+
+/* Cabecera */
+.top{padding-block:22px 16px}
+.eyebrow{margin:0 0 4px;font:500 12px/1.3 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font:700 clamp(30px,5vw,44px)/1 var(--f-display);letter-spacing:.005em;text-wrap:balance}
+.lead{margin:8px 0 0;max-width:62ch;color:var(--muted)}
+
+/* Banda de avance */
+.band{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--band);color:var(--band-ink)}
+.band-in{display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px;padding-block:10px}
+.pct{display:flex;align-items:baseline;gap:2px;font:700 46px/1 var(--f-display);font-variant-numeric:tabular-nums;color:var(--hl);min-width:2.2ch}
+.pct small{font-size:24px;font-weight:600}
+.prog{flex:1 1 320px;min-width:0}
+.bar{position:relative;height:16px;background:var(--band-track);border-radius:2px;overflow:hidden}
+.bar-fill{display:block;height:100%;width:0;background:var(--hl);transition:width .45s cubic-bezier(.2,.7,.2,1)}
+.bar i{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--band)}
+.bar-labels{position:relative;height:15px;margin-top:3px;font:500 10.5px/15px var(--f-mono);color:var(--band-muted)}
+.bar-labels span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.counts{margin:2px 0 0;font-size:13.5px;color:var(--band-muted);font-variant-numeric:tabular-nums}
+.counts b{color:var(--band-ink);font-weight:600}
+.eta{display:flex;flex-direction:column;gap:1px;min-width:0}
+.eta-k{font:500 11px/1.3 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--band-muted)}
+.eta strong{font:700 28px/1.05 var(--f-display);font-variant-numeric:tabular-nums}
+.eta-sub{font-size:13px;color:var(--band-muted)}
+
+/* Herramientas */
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding-block:14px 8px}
+.check{display:inline-flex;align-items:center;gap:7px;cursor:pointer}
+.check input{width:16px;height:16px;accent-color:var(--req);margin:0}
+.btn{border:1.5px solid var(--rule);background:var(--surface);border-radius:3px;padding:5px 11px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--muted)}
+.btn-danger{border-color:var(--warn);color:var(--warn)}
+.confirm{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px}
+.status{margin-left:auto;font-size:13px;color:var(--muted)}
+
+details.how{border:1.5px solid var(--rule);background:var(--surface);border-radius:3px;margin-bottom:10px}
+details.how summary{cursor:pointer;padding:8px 12px;font-weight:600}
+.how-body{padding:4px 12px 12px;display:grid;gap:12px}
+.how-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px}
+.how-row label{display:inline-flex;align-items:center;gap:7px}
+.how-row select,.how-row input[type=number]{border:1.5px solid var(--rule);background:var(--bg);border-radius:3px;padding:4px 6px}
+.how-row input[type=number]{width:64px;font-family:var(--f-mono);font-size:13px}
+.how p{margin:0;color:var(--muted);max-width:75ch}
+.plan{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.plan li{display:grid;grid-template-columns:minmax(150px,190px) 1fr;gap:4px 14px;padding-top:6px;border-top:1px solid var(--rule)}
+.plan b{font-weight:600}
+.plan small{display:block;font:400 11.5px var(--f-mono);color:var(--muted)}
+.plan span{color:var(--muted);min-width:0}
+@media (max-width:560px){.plan li{grid-template-columns:1fr}}
+
+.info{min-height:62px;border-left:4px solid var(--ink);background:var(--surface);padding:8px 12px;margin-bottom:10px}
+.info h2{margin:0;font:600 18px/1.2 var(--f-display);letter-spacing:.01em}
+.info h2 small{font:400 13px var(--f-body);color:var(--muted);margin-left:6px}
+.info p{margin:2px 0 0;font-size:14px}
+.info .k-req{color:var(--req);font-weight:600}
+.info .k-unl{color:var(--unl);font-weight:600}
+.info .pend{text-decoration:underline dotted;text-underline-offset:3px}
+
+/* Malla */
+.sheet-scroll{overflow-x:auto;border:1.5px solid var(--rule);background:var(--surface);border-radius:3px}
+.sheet{position:relative;display:grid;min-width:1290px;padding:10px 11px 14px;
+  grid-template-columns:repeat(10,minmax(112px,1fr));
+  grid-template-rows:auto auto repeat(9,minmax(46px,auto)) auto repeat(5,minmax(40px,auto));
+  column-gap:14px;row-gap:9px}
+.course-bg{grid-row:2/-1;margin-inline:-7px;background:var(--stripe);border-radius:2px}
+.course{grid-row:1;background:var(--hl);color:var(--on-hl);text-align:center;margin-inline:-7px;padding:4px 6px;
+  font:700 15px/1.2 var(--f-display);letter-spacing:.08em;text-transform:uppercase;border-radius:2px;z-index:1}
+.sem{grid-row:2;z-index:1;display:grid;gap:3px;align-content:start;padding-bottom:4px}
+.sem-name{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font:600 15px/1.1 var(--f-display);letter-spacing:.03em;text-transform:uppercase}
+.sem-name span{font:500 11px/1 var(--f-mono);letter-spacing:0;color:var(--muted)}
+.sem-meta{font:400 10.5px/1.3 var(--f-mono);color:var(--muted)}
+.sem-bar{height:4px;background:var(--rule);border-radius:1px;overflow:hidden}
+.sem-bar span{display:block;height:100%;width:0;background:var(--ink);transition:width .35s}
+.sem-all{justify-self:start;border:0;background:none;padding:2px 0;font-size:12px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.sem-all:hover{color:var(--ink)}
+.sep{grid-row:12;grid-column:1/-1;z-index:1;margin-top:8px;padding-top:8px;border-top:1.5px dashed var(--muted);
+  font:500 11px/1.3 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+
+.mat{--fill:var(--adm);--line:var(--adm-l);position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;
+  min-height:44px;padding:0;border:1.5px solid var(--line);border-radius:3px;background:var(--surface);color:var(--ink);
+  font:500 12px/1.15 var(--f-body);text-align:left;cursor:pointer;transition:background-color .18s,transform .12s}
+.mat:active{transform:scale(.97)}
+.mat-name{padding:5px 4px 5px 6px;align-self:center;overflow-wrap:break-word;hyphens:auto;-webkit-hyphens:auto}
+.mat-num{display:grid;grid-auto-rows:1fr;min-width:25px;border-left:1.5px solid var(--line);
+  background:color-mix(in srgb,var(--fill) 26%,transparent);font:500 10.5px/1 var(--f-mono);text-align:center}
+.mat-num b,.mat-num i{display:grid;place-items:center;font-style:normal;font-weight:500;padding:2px 3px}
+.mat-num i{border-top:1px solid var(--line)}
+.a-cia{--fill:var(--cia);--line:var(--cia-l)} .a-ia{--fill:var(--ia);--line:var(--ia-l)}
+.a-ci{--fill:var(--ci);--line:var(--ci-l)}    .a-ind{--fill:var(--ind);--line:var(--ind-l)}
+.a-pas{--fill:var(--pas);--line:var(--pas-l)} .a-hum{--fill:var(--hum);--line:var(--hum-l)}
+.a-opt{--fill:var(--opt);--line:var(--opt-l)} .a-adm{--fill:var(--adm);--line:var(--adm-l)}
+.mat.is-locked{border-style:dashed;color:var(--muted)}
+.mat.is-locked .mat-num{border-left-style:dashed}
+.mat.is-done{background:var(--fill);color:var(--on-paint);border-style:solid}
+.mat.is-done .mat-num{background:transparent;border-color:color-mix(in srgb,var(--on-paint) 45%,transparent)}
+.mat.is-done .mat-num i{border-color:color-mix(in srgb,var(--on-paint) 45%,transparent)}
+.mat.is-done::after{content:"✓";position:absolute;top:-7px;left:-7px;width:15px;height:15px;border-radius:50%;
+  display:grid;place-items:center;background:var(--ink);color:var(--surface);font:700 10px/1 var(--f-body)}
+.mat.is-sel{outline:2.5px solid var(--ink);outline-offset:1px}
+.mat.is-req{outline:2.5px solid var(--req);outline-offset:1px}
+.mat.is-unl{outline:2.5px dashed var(--unl);outline-offset:1px}
+
+.links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;overflow:visible}
+.links path{fill:none;stroke-linecap:round}
+.l-all{stroke:var(--muted);stroke-width:1;opacity:.5}
+.l-req{stroke:var(--req);stroke-width:2.25}
+.l-unl{stroke:var(--unl);stroke-width:2.25;stroke-dasharray:5 4}
+.links marker path{stroke:none}
+#ah-all path{fill:var(--muted)} #ah-req path{fill:var(--req)} #ah-unl path{fill:var(--unl)}
+
+/* Referencias y notas */
+.refs{display:grid;gap:14px 28px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));padding-block:16px 6px}
+.refs h3{margin:0 0 6px;font:600 13px/1.2 var(--f-body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.refs ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 14px}
+.refs li{display:inline-flex;align-items:center;gap:6px;font-size:13.5px}
+.sw{width:22px;height:14px;border:1.5px solid var(--line);background:var(--fill);border-radius:2px;flex:none}
+.sw.open{background:var(--surface);--line:var(--ink)} .sw.lock{background:var(--surface);border-style:dashed;--line:var(--muted)}
+.sw.done{--fill:var(--cia);--line:var(--cia-l)}
+.ln{width:26px;height:0;border-top:2.25px solid var(--req);flex:none} .ln.unl{border-top:2.25px dashed var(--unl)}
+.notes{padding-block:6px 36px;color:var(--muted);font-size:13.5px;max-width:95ch}
+.notes p{margin:0 0 6px}
+
+@media (max-width:640px){
+  .pct{font-size:36px}.pct small{font-size:19px}
+  .band-in{gap:6px 16px}
+  .eta{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+  .eta strong{font-size:21px}
+  .bar-labels{display:none}
+  .status{margin-left:0;flex-basis:100%}
+}
+@media (prefers-reduced-motion:reduce){.bar-fill,.sem-bar span,.mat{transition:none}.mat:active{transform:none}}
+</style>
+
+<header class="top wrap">
+  <p class="eyebrow">Plan de estudios · Universidad Católica «Nuestra Señora de la Asunción»</p>
+  <h1>Ingeniería Industrial</h1>
+  <p class="lead">Tocá una materia para pintarla como aprobada. El avance y la fecha estimada de egreso se actualizan solos.</p>
+</header>
+
+<section class="band" aria-label="Avance de la carrera">
+  <div class="wrap band-in">
+    <div class="pct"><span id="pct">0</span><small>%</small></div>
+    <div class="prog">
+      <div class="bar" id="bar" role="progressbar" aria-label="Créditos aprobados" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="bar-fill" id="barFill"></span></div>
+      <div class="bar-labels" id="barLabels" aria-hidden="true"></div>
+      <p class="counts" id="counts"></p>
+    </div>
+    <div class="eta">
+      <span class="eta-k">Egreso estimado</span>
+      <strong id="etaDate">—</strong>
+      <span class="eta-sub" id="etaSub"></span>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="tools">
+    <label class="check"><input type="checkbox" id="showAll"> Ver todas las correlatividades</label>
+    <span id="resetBox"><button class="btn" id="resetBtn" type="button">Reiniciar</button></span>
+    <span class="status" id="status" role="status">Guardado en este dispositivo</span>
+  </div>
+
+  <details class="how" id="how">
+    <summary>Cómo se calcula la fecha de egreso</summary>
+    <div class="how-body">
+      <div class="how-row">
+        <label>Lo pendiente lo curso desde <select id="start"></select></label>
+        <label>Hasta <input type="number" id="cap" min="12" max="45" step="1" value="33" inputmode="numeric"> créditos por semestre</label>
+        <label class="check"><input type="checkbox" id="parity" checked> Cada materia se dicta solo en su semestre (impares marzo–julio, pares agosto–diciembre)</label>
+      </div>
+      <p>Las materias sin pintar se reparten semestre por semestre respetando las correlatividades y el tope de créditos. Proyecto Final queda para cuando todo lo anterior esté aprobado. La fecha es el cierre del último semestre proyectado.</p>
+      <ol class="plan" id="plan"></ol>
+    </div>
+  </details>
+
+  <div class="info" id="info" aria-live="polite"></div>
+
+  <div class="sheet-scroll" tabindex="0" role="region" aria-label="Malla curricular por semestre">
+    <div class="sheet" id="sheet" lang="es">
+      <svg class="links" id="links" aria-hidden="true">
+        <defs>
+          <marker id="ah-all" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z"/></marker>
+          <marker id="ah-req" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L8 4L0 8z"/></marker>
+          <marker id="ah-unl" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L8 4L0 8z"/></marker>
+        </defs>
+        <g id="linkPaths"></g>
+      </svg>
+    </div>
+  </div>
+
+  <section class="refs" aria-label="Referencias">
+    <div><h3>Áreas</h3><ul id="legendAreas"></ul></div>
+    <div><h3>Estados</h3>
+      <ul>
+        <li><span class="sw done"></span>✓ Aprobada</li>
+        <li><span class="sw open"></span>Habilitada</li>
+        <li><span class="sw lock"></span>Con previas pendientes</li>
+        <li><span class="ln"></span>Requiere</li>
+        <li><span class="ln unl"></span>Habilita</li>
+      </ul>
+    </div>
+    <div><h3>Números de cada materia</h3><ul><li>Arriba: créditos</li><li>Abajo: horas del semestre</li></ul></div>
+  </section>
+
+  <section class="notes">
+    <p>Todas las asignaturas del Curso de Admisión y del Primer Semestre deben estar aprobadas para habilitarse la inscripción a cualquier asignatura de Segundo Semestre, así como todas las previas correspondientes.</p>
+    <p>* Para inscribirse a Materiales para Ingeniería Industrial hay que tener aprobadas todas las asignaturas del tercer semestre.</p>
+    <p>** Para inscribirse a Economía Política hay que tener aprobadas todas las asignaturas del cuarto semestre.</p>
+    <p>El avance cuenta las 66 materias del plan (298 créditos, 4.602 horas). Curso de Admisión, humanísticas optativas y optativas se pueden pintar, pero no suman.</p>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Datos del plan ---------- */
+var AREAS = {
+  cia:"Civil, Industrial y Ambiental", ia:"Industrial y Ambiental", ci:"Civil e Industrial", ind:"Industrial",
+  pas:"Departamento de Pastoral", hum:"Humanísticas comunes", opt:"Optativas", adm:"Curso de Admisión"
+};
+var COURSES = ["Primer curso","Segundo curso","Tercer curso","Cuarto curso","Quinto curso"];
+var ORD = ["1.er","2.º","3.er","4.º","5.º","6.º","7.º","8.º","9.º","10.º"];
+var SEM_HOURS = [282,496,432,528,528,512,512,528,416,368];
+
+// id, nombre, semestre, fila, área, créditos, horas, cuenta para el avance
+var RAW = [
+ ["idt","Introducción al Dibujo Técnico",1,1,"cia",3,48,1],
+ ["tri","Trigonometría",1,2,"cia",5,80,1],
+ ["alg","Álgebra",1,3,"cia",5,80,1],
+ ["geo","Geometría Analítica",1,4,"cia",4,64,1],
+ ["iing","Introducción a la Ingeniería",1,7,"cia",2,10,1],
+
+ ["dt","Dibujo Técnico",2,1,"cia",4,64,1],
+ ["cal1","Cálculo 1",2,2,"cia",6,96,1],
+ ["ifis","Introducción a la Física",2,3,"cia",6,96,1],
+ ["algv","Álgebra Vectorial",2,4,"cia",4,64,1],
+ ["qui","Química General",2,7,"cia",6,96,1],
+ ["coe2","Comunicación Oral y Escrita 2",2,8,"hum",3,48,1],
+ ["mc1","Misterio Cristiano 1",2,9,"pas",2,32,1],
+
+ ["rg1","Representación Gráfica 1",3,1,"ci",5,80,1],
+ ["cal2","Cálculo 2",3,2,"cia",6,96,1],
+ ["inf1","Informática 1",3,3,"cia",4,64,1],
+ ["algl","Álgebra Lineal",3,4,"cia",4,64,1],
+ ["fis1","Física 1",3,5,"cia",6,96,1],
+ ["mc2","Misterio Cristiano 2",3,9,"pas",2,32,1],
+
+ ["rg2","Representación Gráfica 2",4,1,"ci",5,80,1],
+ ["cal3","Cálculo 3",4,2,"cia",4,64,1],
+ ["ed","Ecuaciones Diferenciales",4,4,"cia",6,96,1],
+ ["fis2","Física 2",4,5,"cia",6,96,1],
+ ["mr1","Mecánica Racional 1",4,6,"cia",4,64,1],
+ ["mat","Materiales para Ing. Industrial *",4,7,"ind",6,96,1],
+ ["ac","Antropología Cristiana",4,9,"pas",2,32,1],
+
+ ["inf2","Informática 2",5,1,"ind",4,64,1],
+ ["fis3","Física 3",5,4,"cia",6,96,1],
+ ["ii1","Instalaciones Industriales 1",5,5,"ind",6,96,1],
+ ["mr2","Mecánica Racional 2",5,6,"ia",4,64,1],
+ ["pm","Procesos de Manufactura",5,7,"ind",6,96,1],
+ ["eco","Economía Política **",5,8,"cia",5,80,1],
+ ["ef","Ética Fundamental",5,9,"pas",2,32,1],
+
+ ["est","Estadística",6,2,"cia",5,80,1],
+ ["tr1","Transferencias 1",6,3,"ind",6,96,1],
+ ["ter","Termodinámica Aplicada",6,4,"ia",5,80,1],
+ ["rm1","Resistencia de Materiales 1",6,5,"cia",6,96,1],
+ ["hsi","Higiene y Seguridad Industrial",6,6,"ind",4,64,1],
+ ["adm1","Administración 1",6,8,"ind",4,64,1],
+ ["ep","Ética Personal",6,9,"pas",2,32,1],
+
+ ["io","Investigación de Operaciones",7,1,"ia",6,96,1],
+ ["tr2","Transferencias 2",7,2,"ind",5,80,1],
+ ["mf","Mecánica de Fluidos",7,3,"cia",5,80,1],
+ ["rm2","Resistencia de Materiales 2",7,4,"ci",6,96,1],
+ ["pl1","Producción Limpia 1",7,6,"ia",4,64,1],
+ ["adm2","Administración 2",7,8,"ind",4,64,1],
+ ["es1","Ética Social 1",7,9,"pas",2,32,1],
+
+ ["imp","Ingeniería de Métodos y Planta",8,2,"ia",4,64,1],
+ ["dm","Diseño Mecánico",8,3,"ind",6,96,1],
+ ["mi","Mantenimiento Industrial",8,4,"ind",4,64,1],
+ ["li","Logística Industrial",8,5,"ind",4,64,1],
+ ["pl2","Producción Limpia 2",8,6,"ia",4,64,1],
+ ["ica","Instrumentación, Control y Automatización",8,7,"ind",4,64,1],
+ ["ie","Ingeniería Económica",8,8,"ind",5,80,1],
+ ["es2","Ética Social 2",8,9,"pas",2,32,1],
+
+ ["pr1","Producción 1",9,4,"ia",4,64,1],
+ ["iga2","Instrumentos de Gestión Ambiental 2",9,5,"ia",5,80,1],
+ ["ii2","Instalaciones Industriales 2",9,6,"ind",5,80,1],
+ ["mer","Mercadotecnia",9,7,"ind",4,64,1],
+ ["eep","Elaboración y Evaluación de Proyectos",9,8,"ia",6,96,1],
+ ["epr","Ética Profesional",9,9,"pas",2,32,1],
+
+ ["gc","Gestión de Calidad",10,1,"ind",4,64,1],
+ ["pf","Proyecto Final",10,3,"cia",12,48,1],
+ ["pr2","Producción 2",10,4,"ia",4,64,1],
+ ["pge","Planificación y Gestión Estratégica",10,7,"ia",4,64,1],
+ ["tco","Teoría y Comportamiento Organizacional",10,8,"ia",4,64,1],
+ ["il","Ingeniería Legal",10,9,"ci",4,64,1],
+
+ // Fuera del avance
+ ["fyc","Fe y Ciencia (Seminario)",1,9,"adm",0,0,0],
+ ["hpy","Historia del Paraguay",1,10,"adm",0,0,0],
+ ["log","Lógica Simbólica",1,11,"adm",0,0,0],
+ ["coe1","Comunicación Oral y Escrita 1",1,12,"adm",0,0,0],
+ ["met","Metodología del Aprendizaje",1,13,"adm",0,0,0],
+ ["matad","Matemática",1,14,"adm",0,0,0],
+ ["soc","Introducción a la Sociología",2,10,"hum",3,0,0],
+ ["hcu","Historia de la Cultura",2,11,"hum",3,0,0],
+ ["afi","Antropología Filosófica",2,12,"hum",3,0,0],
+ ["iia","Introducción a la Ing. Ambiental",3,10,"opt",4,0,0],
+ ["geol","Geología",3,11,"opt",4,0,0],
+ ["cm1","Ciencia de los Materiales 1",3,13,"opt",5,0,0],
+ ["sr","Sensoreamiento Remoto",4,10,"opt",5,0,0],
+ ["cm2","Ciencia de los Materiales 2",4,13,"opt",5,0,0],
+ ["top","Topografía",5,10,"opt",6,0,0],
+ ["ga","Geología Ambiental",5,11,"opt",3,0,0],
+ ["est1","Estática 1",5,12,"opt",6,0,0],
+ ["tm1","Tecnología de los Materiales 1",5,13,"opt",5,0,0],
+ ["ma","Matemática Aplicada",6,12,"opt",5,0,0],
+ ["tm2","Tecnología de los Materiales 2",6,13,"opt",5,0,0],
+ ["giea","Gestión Integral de Emis. Atmosf.",7,10,"opt",4,0,0],
+ ["girs","Gestión Integral de Res. Sólidos",8,10,"opt",4,0,0],
+ ["taa","Trat. y Abastec. de Aguas",8,11,"opt",4,0,0],
+ ["ha","Hidráulica Aplicada",8,12,"opt",5,0,0],
+ ["tsa","Trat. y Sist. de Alc. de Ef. Líquid.",9,10,"opt",4,0,0],
+ ["oa","Ordenamiento Ambiental",9,11,"opt",4,0,0],
+ ["hoh","Hidrología y Obras Hidráulicas",9,12,"opt",6,0,0]
+];
+
+// Correlatividades: materia <- previas (flechas del plan)
+var PRE = {
+  rg1:["dt"], rg2:["dt"], cal2:["cal1"], cal3:["cal2"], ed:["cal2"],
+  fis1:["cal1","ifis","algv"], algl:["algv"], inf2:["inf1"], fis2:["fis1"], mr1:["algl","fis1"],
+  mat:["qui"], fis3:["fis1"], ii1:["rg2","fis2"], mr2:["mr1"], pm:["mat"],
+  est:["cal3"], tr1:["ed","fis3"], ter:["fis3"], rm1:["ed","mr1"], hsi:["pm"], adm1:["eco"],
+  io:["inf2","est"], tr2:["tr1","ter"], mf:["cal3","fis3"], rm2:["rm1"], pl1:["pm"], adm2:["adm1"],
+  imp:["io"], dm:["mr2","rm2"], mi:["hsi"], li:["adm1"], pl2:["pl1"], ica:["ii1","pm"], ie:["adm2"],
+  pr1:["mi","li"], iga2:["pl2"], ii2:["tr2","mf"], mer:["adm2"], eep:["ie"],
+  gc:["est","pr1"], pr2:["pr1","imp"], pge:["mer","eep"], tco:["adm1","pr1"], il:["eep"],
+  mc2:["mc1"], ac:["mc2"], ef:["ac"], ep:["ef"], es1:["ep"], es2:["es1"], epr:["es2"]
+};
+
+var SUBJ = RAW.map(function(r){return {id:r[0],name:r[1],sem:r[2],row:r[3],area:r[4],cr:r[5],h:r[6],core:!!r[7]};});
+var BY = {}; SUBJ.forEach(function(s){BY[s.id]=s;});
+var CORE = SUBJ.filter(function(s){return s.core;});
+var TOTAL_CR = CORE.reduce(function(a,s){return a+s.cr;},0);
+var TOTAL_H = CORE.reduce(function(a,s){return a+s.h;},0);
+var SEM_CORE = []; for(var i=1;i<=10;i++){ SEM_CORE[i]=CORE.filter(function(s){return s.sem===i;}); }
+function ids(list){return list.map(function(s){return s.id;});}
+
+var POST = {};
+Object.keys(PRE).forEach(function(to){PRE[to].forEach(function(from){(POST[from]=POST[from]||[]).push(to);});});
+
+// Reglas escritas en el plan además de las flechas
+function gate(s){
+  if(!s.core) return {ids:[],text:""};
+  if(s.id==="mat") return {ids:ids(SEM_CORE[3]),text:"todo el 3.er semestre"};
+  if(s.id==="eco") return {ids:ids(SEM_CORE[4]),text:"todo el 4.º semestre"};
+  if(s.sem>=2) return {ids:ids(SEM_CORE[1]),text:(s.sem===2||!PRE[s.id])?"todo el 1.er semestre":""};
+  return {ids:[],text:""};
+}
+var REQ = {};
+SUBJ.forEach(function(s){ REQ[s.id]=(PRE[s.id]||[]).concat(gate(s).ids); });
+// Solo para la proyección: Proyecto Final al final
+var REQ_PLAN = {}; SUBJ.forEach(function(s){REQ_PLAN[s.id]=REQ[s.id];});
+REQ_PLAN.pf = ids(CORE.filter(function(s){return s.sem<=9;}));
+
+/* ---------- Proyección de egreso ---------- */
+function periodOptions(now){
+  var m=now.getMonth()+1, y=now.getFullYear();
+  var cur = m<=7 ? {y:y,p:1} : {y:y,p:2};
+  var running = m>=3;
+  var out=[], c=cur;
+  for(var k=0;k<6;k++){
+    out.push({y:c.y,p:c.p,key:c.y+"-"+c.p,label:(c.p===1?"1.er":"2.º")+" semestre "+c.y+(k===0&&running?" (en curso)":"")});
+    c = c.p===1 ? {y:c.y,p:2} : {y:c.y+1,p:1};
+  }
+  return out;
+}
+function project(done,cap,parity,start){
+  var got={}; CORE.forEach(function(s){ if(done[s.id]) got[s.id]=1; });
+  var pending=CORE.filter(function(s){return !got[s.id];});
+  var y=start.y,p=start.p,plan=[],guard=0;
+  while(pending.length && guard++<80){
+    var avail=pending.filter(function(s){
+      if(parity && ((s.sem%2===1)!==(p===1))) return false;
+      return REQ_PLAN[s.id].every(function(r){return got[r];});
+    }).sort(function(a,b){return a.sem-b.sem||a.row-b.row;});
+    var cr=0,take=[];
+    avail.forEach(function(s){ if(!take.length || cr+s.cr<=cap){ take.push(s); cr+=s.cr; } });
+    if(take.length){
+      plan.push({y:y,p:p,items:take,cr:cr});
+      take.forEach(function(s){got[s.id]=1;});
+      pending=pending.filter(function(s){return !got[s.id];});
+    }
+    if(p===1){p=2;} else {p=1;y++;}
+  }
+  return {plan:plan,stuck:pending.length>0};
+}
+window.__malla = {project:project,CORE:CORE,TOTAL_CR:TOTAL_CR,TOTAL_H:TOTAL_H};
+
+/* ---------- Estado y guardado ---------- */
+var LS_KEY="malla-ii-uca-v1";
+var OPTIONS=periodOptions(new Date());
+var state={done:{},cap:33,parity:true,start:null,all:false,t:0};
+var focusId=null, touched=false;
+
+function apply(d){
+  if(!d||typeof d!=="object") return;
+  var done={};
+  var arr=Array.isArray(d.done)?d.done:(d.done&&typeof d.done==="object"?Object.keys(d.done):[]);
+  arr.forEach(function(id){ if(BY[id]) done[id]=true; });
+  state.done=done;
+  var cap=Number(d.cap); if(cap>=12&&cap<=45) state.cap=Math.round(cap);
+  if(typeof d.parity==="boolean") state.parity=d.parity;
+  state.start=typeof d.start==="string"?d.start:null;
+  if(typeof d.all==="boolean") state.all=d.all;
+  state.t=Number(d.t)||0;
+}
+function serialize(){return {done:Object.keys(state.done),cap:state.cap,parity:state.parity,start:state.start,all:state.all,t:state.t};}
+function loadLocal(){try{var r=localStorage.getItem(LS_KEY); if(r) apply(JSON.parse(r));}catch(e){}}
+function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(serialize()));return true;}catch(e){return false;}}
+
+var docRef=null,writing=false,dirty=false,timer=null,localOk=true;
+var $=function(id){return document.getElementById(id);};
+function setStatus(kind){
+  var t={cloud:"Guardado en tu cuenta",saving:"Guardando…",local:"Guardado en este dispositivo",
+         none:"No se pudo guardar: lo pintado se pierde al cerrar la página",
+         fail:"No se pudo guardar en tu cuenta. Queda en este dispositivo."}[kind];
+  $("status").textContent=t;
+}
+function commit(){
+  state.t=Date.now(); touched=true;
+  localOk=saveLocal();
+  if(docRef){ dirty=true; clearTimeout(timer); timer=setTimeout(flush,700); setStatus("saving"); }
+  else setStatus(localOk?"local":"none");
+  render();
+}
+function flush(){
+  if(!docRef||writing||!dirty) return;
+  writing=true; dirty=false;
+  docRef.set(serialize()).then(function(){
+    writing=false;
+    if(dirty) flush(); else setStatus("cloud");
+  },function(){
+    writing=false; docRef=null; setStatus(localOk?"fail":"none");
+  });
+}
+function connect(){
+  if(!window.claude||typeof window.claude.use!=="function") return;
+  Promise.all([window.claude.use("db"),window.claude.use("user")]).then(function(r){
+    var db=r[0],user=r[1]; if(!db||!user) return;
+    return user.id().then(function(uid){
+      if(!uid) return;
+      var ref=db.doc("data/users/"+uid+"/malla");
+      var timeout=new Promise(function(_,rej){setTimeout(function(){rej(new Error("timeout"));},10000);});
+      return Promise.race([ref.get(),timeout]).then(function(snap){
+        var remoteT=0;
+        if(snap.exists){
+          var d=snap.data()||{}; remoteT=Number(d.t)||0;
+          if(remoteT>state.t){ apply(d); saveLocal(); syncControls(); render(); }
+        }
+        docRef=ref;
+        if(touched&&state.t>remoteT){ dirty=true; flush(); setStatus("saving"); }
+        else setStatus("cloud");
+      });
+    });
+  }).catch(function(){});
+}
+
+/* ---------- Construcción de la malla ---------- */
+var sheet=$("sheet"), EL={};
+function el(tag,cls,text){var e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e;}
+function gridRow(row){return row<=9?row+2:row+3;}
+
+function build(){
+  var frag=document.createDocumentFragment();
+  COURSES.forEach(function(name,k){
+    if(k%2===0){ var bg=el("div","course-bg"); bg.style.gridColumn=(2*k+1)+" / span 2"; frag.appendChild(bg); }
+    var c=el("div","course",name); c.style.gridColumn=(2*k+1)+" / span 2"; frag.appendChild(c);
+  });
+  for(var s=1;s<=10;s++){
+    var cr=SEM_CORE[s].reduce(function(a,x){return a+x.cr;},0);
+    var h=el("div","sem"); h.style.gridColumn=String(s);
+    var nm=el("div","sem-name","Semestre "+s); var cnt=el("span"); cnt.id="sm-"+s; nm.appendChild(cnt); h.appendChild(nm);
+    h.appendChild(el("div","sem-meta",cr+" cr · "+SEM_HOURS[s-1]+" h"));
+    var bar=el("div","sem-bar"); var fill=el("span"); fill.id="sb-"+s; bar.appendChild(fill); h.appendChild(bar);
+    var all=el("button","sem-all","Pintar todo"); all.type="button"; all.id="sa-"+s; all.dataset.sem=String(s); h.appendChild(all);
+    frag.appendChild(h);
+  }
+  var sep=el("div","sep","No suman al avance · Curso de Admisión, humanísticas optativas y optativas"); frag.appendChild(sep);
+  SUBJ.forEach(function(s){
+    var b=el("button","mat a-"+s.area); b.type="button"; b.id="m-"+s.id; b.dataset.id=s.id;
+    b.style.gridColumn=String(s.sem); b.style.gridRow=String(gridRow(s.row));
+    b.appendChild(el("span","mat-name",s.name));
+    if(s.cr){ var n=el("span","mat-num"); n.appendChild(el("b",null,String(s.cr))); if(s.h) n.appendChild(el("i",null,String(s.h))); b.appendChild(n); }
+    EL[s.id]=b; frag.appendChild(b);
+  });
+  sheet.insertBefore(frag,$("links"));
+
+  var la=$("legendAreas");
+  Object.keys(AREAS).forEach(function(k){
+    var li=el("li"); var sw=el("span","sw a-"+k); li.appendChild(sw); li.appendChild(document.createTextNode(AREAS[k])); la.appendChild(li);
+  });
+
+  var marks=[],acc=0;
+  for(var c2=0;c2<5;c2++){
+    var crs=SEM_CORE[2*c2+1].concat(SEM_CORE[2*c2+2]).reduce(function(a,x){return a+x.cr;},0);
+    marks.push({from:acc,to:acc+crs,label:ORD[c2].replace(".er",".º")+" curso"}); acc+=crs;
+  }
+  marks.forEach(function(m,k){
+    if(k>0){ var t=el("i"); t.style.left=(m.from/TOTAL_CR*100)+"%"; $("bar").appendChild(t); }
+    var lab=el("span",null,m.label); lab.style.left=((m.from+m.to)/2/TOTAL_CR*100)+"%"; $("barLabels").appendChild(lab);
+  });
+
+  var sel=$("start");
+  OPTIONS.forEach(function(o){var op=el("option",null,o.label); op.value=o.key; sel.appendChild(op);});
+}
+
+function isOpen(s){return REQ[s.id].every(function(r){return state.done[r];});}
+function startPeriod(){
+  for(var k=0;k<OPTIONS.length;k++) if(OPTIONS[k].key===state.start) return OPTIONS[k];
+  return OPTIONS[0];
+}
+function fmt(n){return n.toLocaleString("es-PY");}
+function periodName(e){return (e.p===1?"1.er":"2.º")+" semestre "+e.y;}
+
+function syncControls(){
+  $("showAll").checked=state.all; $("cap").value=state.cap; $("parity").checked=state.parity; $("start").value=startPeriod().key;
+}
+
+function render(){
+  var doneCr=0,doneH=0,doneN=0;
+  SUBJ.forEach(function(s){
+    var d=!!state.done[s.id], open=d||isOpen(s), b=EL[s.id];
+    b.classList.toggle("is-done",d);
+    b.classList.toggle("is-locked",!d&&!open);
+    b.setAttribute("aria-pressed",d?"true":"false");
+    b.setAttribute("aria-label",s.name+(s.cr?", "+s.cr+" créditos":"")+(s.h?", "+s.h+" horas":"")+", "+(d?"aprobada":open?"habilitada":"con previas pendientes"));
+    if(d&&s.core){doneCr+=s.cr;doneH+=s.h;doneN++;}
+  });
+  for(var i=1;i<=10;i++){
+    var list=SEM_CORE[i], n=list.filter(function(s){return state.done[s.id];}).length;
+    $("sm-"+i).textContent=n+"/"+list.length;
+    $("sb-"+i).style.width=(n/list.length*100)+"%";
+    $("sa-"+i).textContent=n===list.length?"Despintar todo":"Pintar todo";
+  }
+  var ratio=doneCr/TOTAL_CR, pct=doneN===CORE.length?100:Math.floor(ratio*100);
+  $("pct").textContent=String(pct);
+  $("barFill").style.width=(ratio*100)+"%";
+  $("bar").setAttribute("aria-valuenow",String(pct));
+  var c=$("counts"); c.textContent="";
+  [[fmt(doneCr)," de "+fmt(TOTAL_CR)+" créditos"],[String(doneN)," de "+CORE.length+" materias"],[fmt(doneH)," de "+fmt(TOTAL_H)+" h"]].forEach(function(p,k){
+    if(k) c.appendChild(document.createTextNode(" · "));
+    c.appendChild(el("b",null,p[0])); c.appendChild(document.createTextNode(p[1]));
+  });
+
+  var res=project(state.done,state.cap,state.parity,startPeriod());
+  var planEl=$("plan"); planEl.textContent="";
+  if(!res.plan.length){
+    $("etaDate").textContent="¡Carrera completa!"; $("etaSub").textContent="Aprobaste las "+CORE.length+" materias del plan";
+    planEl.appendChild(el("li",null,"No queda nada por cursar."));
+  } else {
+    var last=res.plan[res.plan.length-1];
+    $("etaDate").textContent=(last.p===1?"Julio ":"Diciembre ")+last.y;
+    $("etaSub").textContent=(res.plan.length===1?"falta 1 semestre":"faltan "+res.plan.length+" semestres")+" · "+fmt(TOTAL_CR-doneCr)+" créditos";
+    res.plan.forEach(function(e){
+      var li=el("li"); var head=el("div"); head.appendChild(el("b",null,periodName(e)));
+      head.appendChild(el("small",null,e.cr+" cr · "+e.items.length+(e.items.length===1?" materia":" materias")));
+      li.appendChild(head); li.appendChild(el("span",null,e.items.map(function(s){return s.name.replace(/ \*+$/,"");}).join(" · ")));
+      planEl.appendChild(li);
+    });
+  }
+  renderFocus();
+}
+
+function renderFocus(){
+  var info=$("info"); info.textContent="";
+  SUBJ.forEach(function(s){EL[s.id].classList.remove("is-sel","is-req","is-unl");});
+  var s=focusId&&BY[focusId];
+  if(!s){
+    info.appendChild(el("h2",null,"Elegí una materia"));
+    info.appendChild(el("p",null,"Al tocarla se pinta y acá ves qué requiere y qué habilita."));
+  } else {
+    EL[s.id].classList.add("is-sel");
+    var pre=PRE[s.id]||[], post=POST[s.id]||[], g=gate(s);
+    pre.forEach(function(id){EL[id].classList.add("is-req");});
+    post.forEach(function(id){EL[id].classList.add("is-unl");});
+    var d=!!state.done[s.id];
+    var h=el("h2",null,s.name.replace(/ \*+$/,""));
+    var bits=[ORD[s.sem-1]+" semestre"]; if(s.cr) bits.push(s.cr+" créditos"); if(s.h) bits.push(s.h+" h");
+    bits.push(AREAS[s.area]); bits.push(d?"aprobada":(isOpen(s)?"habilitada":"con previas pendientes")); if(!s.core) bits.push("no suma al avance");
+    h.appendChild(el("small",null,bits.join(" · "))); info.appendChild(h);
+    var p=el("p"); p.appendChild(el("span","k-req","Requiere: "));
+    var any=false;
+    pre.forEach(function(id,k){
+      if(k) p.appendChild(document.createTextNode(", "));
+      var ok=!!state.done[id]; p.appendChild(el("span",ok?null:"pend",(ok?"✓ ":"")+BY[id].name.replace(/ \*+$/,""))); any=true;
+    });
+    if(g.text){ p.appendChild(document.createTextNode((any?", ":"")+g.text)); any=true; }
+    if(!any) p.appendChild(document.createTextNode(s.core?"nada":"sin correlatividades en el plan"));
+    p.appendChild(document.createTextNode("  ·  "));
+    p.appendChild(el("span","k-unl","Habilita: "));
+    p.appendChild(document.createTextNode(post.length?post.map(function(id){return BY[id].name.replace(/ \*+$/,"");}).join(", "):"nada más"));
+    info.appendChild(p);
+  }
+  drawLinks();
+}
+
+/* ---------- Flechas ---------- */
+var NS="http://www.w3.org/2000/svg";
+function drawLinks(){
+  var g=$("linkPaths"); while(g.firstChild) g.removeChild(g.firstChild);
+  var base=sheet.getBoundingClientRect(); if(!base.width) return;
+  function add(from,to,kind){
+    var a=EL[from].getBoundingClientRect(), b=EL[to].getBoundingClientRect();
+    var x1=a.right-base.left, y1=a.top+a.height/2-base.top, x2=b.left-base.left-2, y2=b.top+b.height/2-base.top;
+    var dx=Math.max(12,(x2-x1)*0.45);
+    var p=document.createElementNS(NS,"path");
+    p.setAttribute("d","M"+x1.toFixed(1)+" "+y1.toFixed(1)+" C"+(x1+dx).toFixed(1)+" "+y1.toFixed(1)+" "+(x2-dx).toFixed(1)+" "+y2.toFixed(1)+" "+x2.toFixed(1)+" "+y2.toFixed(1));
+    p.setAttribute("class","l-"+kind); p.setAttribute("marker-end","url(#ah-"+kind+")");
+    g.appendChild(p);
+  }
+  if(state.all){
+    Object.keys(PRE).forEach(function(to){PRE[to].forEach(function(from){
+      if(focusId&&(to===focusId||from===focusId)) return; add(from,to,"all");
+    });});
+  }
+  if(focusId){
+    (PRE[focusId]||[]).forEach(function(from){add(from,focusId,"req");});
+    (POST[focusId]||[]).forEach(function(to){add(focusId,to,"unl");});
+  }
+}
+
+/* ---------- Eventos ---------- */
+function wire(){
+  sheet.addEventListener("click",function(ev){
+    var m=ev.target.closest(".mat");
+    if(m){
+      var id=m.dataset.id;
+      if(state.done[id]) delete state.done[id]; else state.done[id]=true;
+      focusId=id; commit(); return;
+    }
+    var a=ev.target.closest(".sem-all");
+    if(a){
+      var list=SEM_CORE[Number(a.dataset.sem)];
+      var all=list.every(function(s){return state.done[s.id];});
+      list.forEach(function(s){ if(all) delete state.done[s.id]; else state.done[s.id]=true; });
+      commit();
+    }
+  });
+  sheet.addEventListener("pointerover",function(ev){
+    if(ev.pointerType!=="mouse") return;
+    var m=ev.target.closest(".mat"); if(m&&m.dataset.id!==focusId){focusId=m.dataset.id; renderFocus();}
+  });
+  sheet.addEventListener("focusin",function(ev){
+    var m=ev.target.closest(".mat"); if(m&&m.dataset.id!==focusId){focusId=m.dataset.id; renderFocus();}
+  });
+  $("showAll").addEventListener("change",function(){state.all=this.checked; commit();});
+  $("parity").addEventListener("change",function(){state.parity=this.checked; commit();});
+  $("start").addEventListener("change",function(){state.start=this.value; commit();});
+  $("cap").addEventListener("change",function(){
+    var v=Math.round(Number(this.value)); if(!(v>=12)) v=12; if(v>45) v=45; this.value=v; state.cap=v; commit();
+  });
+  $("resetBox").addEventListener("click",function(ev){
+    var b=ev.target.closest("button"); if(!b) return;
+    var box=$("resetBox");
+    if(b.id==="resetBtn"){
+      box.textContent=""; box.className="confirm";
+      box.appendChild(el("span",null,"¿Despintar todas las materias?"));
+      var y=el("button","btn btn-danger","Sí, despintar"); y.type="button"; y.id="resetYes"; box.appendChild(y);
+      var n=el("button","btn","Cancelar"); n.type="button"; n.id="resetNo"; box.appendChild(n);
+      return;
+    }
+    var wipe=b.id==="resetYes";
+    box.textContent=""; box.className="";
+    var r=el("button","btn","Reiniciar"); r.type="button"; r.id="resetBtn"; box.appendChild(r);
+    if(wipe){ state.done={}; focusId=null; commit(); }
+  });
+  if(window.ResizeObserver) new ResizeObserver(drawLinks).observe(sheet); else window.addEventListener("resize",drawLinks);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(drawLinks);
+}
+
+loadLocal();
+build();
+syncControls();
+wire();
+render();
+connect();
+})();
+</script>
+</body>
+</html>
